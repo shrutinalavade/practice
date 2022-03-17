@@ -1,0 +1,46 @@
+# Welcome to serverless. Read the docs
+# https://serverless.com/framework/docs/
+
+# Serverless.yml is the configuration the CLI
+# uses to deploy your code to your provider of choice
+
+# The `service` block is the name of the service
+service: S3
+
+frameworkVersion: '3'
+
+# The `provider` block defines where your service will be deployed
+provider:
+  name: aws
+  runtime: nodejs14.x
+  stage: dev
+  region: ap-south-1
+  profile: default
+
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "s3:ListBucket"
+        - "s3:GetObject"
+        - "s3:PutObject"
+      Resource: "arn:aws:s3:::mys3buckoperationsss/*"
+                
+  
+functions:
+  appendText:
+    handler: index.appendText
+    events:
+      - http:
+          path: appendText
+          method: put
+
+
+resources:
+  Resources:
+    S3Bucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: mys3buckoperationsss
+
+
+#https://i2rldhgk53.execute-api.ap-south-1.amazonaws.com/dev/appendText?text=vijay1 

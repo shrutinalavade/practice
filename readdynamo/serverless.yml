@@ -1,0 +1,53 @@
+service: readdynamo
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region: ap-south-1
+  environment:
+    DYNAMO_TABLE_NAME: EmployeeTable
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMO_TABLE_NAME}"
+
+functions:
+  listPosts:
+    handler: service/readall.listPosts
+    events:
+      - http:
+          path: posts/readall
+          method: get
+          cors: true
+
+  getPost:
+    handler: service/read.getPost
+    events:
+      - http:
+          path: post/{id}
+          method: get
+          cors: true
+
+resources:
+  Resources:
+    UsersDynamoDbTable:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:provider.environment.DYNAMO_TABLE_NAME}
+
+
+# GET - https://9u70t4rpvb.execute-api.ap-south-1.amazonaws.com/dev/posts/readall
+# GET - https://9u70t4rpvb.execute-api.ap-south-1.amazonaws.com/dev/post/{id}
